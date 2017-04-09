@@ -1,0 +1,13 @@
+node_modules/
+dist/
+out/
+demo/out/
+demo/node_modules/
+.env
+.env.local
+*.tsbuildinfo
+coverage/
+.vmdx-cache/
+test-results/
+transcripts/
+contribot.state.*.json

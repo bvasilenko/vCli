@@ -33,7 +33,12 @@ function withTempMessageFile<T>(
   try {
     return fn(filePath);
   } finally {
-    unlinkSync(filePath);
+    try {
+      unlinkSync(filePath);
+    } catch (e) {
+      // Tolerate already-removed temp file (CI tmp-cleanup, rapid same-ms calls).
+      if ((e as NodeJS.ErrnoException).code !== "ENOENT") throw e;
+    }
   }
 }
 

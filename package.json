@@ -1,6 +1,6 @@
 {
   "name": "@booga/vcli",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Component scaffolding CLI. init project, add from registry, build with vSsg, check with vLint.",
   "type": "module",
   "bin": {

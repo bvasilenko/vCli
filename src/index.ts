@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 bvasilenko
 export { VcliConfigSchema, loadConfig, saveConfig } from "./config.js";
 export type { VcliConfig } from "./config.js";
 

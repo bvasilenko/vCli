@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 bvasilenko
 
 import { execSync } from "node:child_process";
 import { writeFileSync, unlinkSync } from "node:fs";

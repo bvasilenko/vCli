@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 bvasilenko
 import path from "node:path";
 import fs from "fs-extra";
 import { saveConfig, VcliConfigSchema, type VcliConfig } from "../config.js";

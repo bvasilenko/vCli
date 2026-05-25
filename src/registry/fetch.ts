@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 bvasilenko
 import { registry as localRegistry, type Registry } from "@booga/vregistry";
 import type { VcliConfig } from "../config.js";
 import { readCache, writeCache } from "./cache.js";

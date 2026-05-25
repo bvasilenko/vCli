@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 bvasilenko
 import path from "node:path";
 import fs from "fs-extra";
 import type { Registry, RegistryEntry } from "@booga/vregistry";

@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 bvasilenko
 
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";

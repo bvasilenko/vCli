@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 bvasilenko
 
 export const COMMIT_A_DATE = "2017-04-10T00:00:00+03:00";
 

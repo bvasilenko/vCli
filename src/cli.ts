@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 bvasilenko
 import { readFileSync } from "node:fs";
 import { Command } from "commander";
 import { VcliError } from "./utils/exit.js";

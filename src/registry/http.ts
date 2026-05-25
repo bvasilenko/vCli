@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 bvasilenko
 import { RegistrySchema, type Registry } from "@booga/vregistry";
 
 export async function fetchFromUrl(url: string): Promise<Registry> {

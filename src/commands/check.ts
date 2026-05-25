@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 bvasilenko
 import path from "node:path";
 import { lintGlob } from "@booga/vlint";
 import { log } from "../utils/log.js";

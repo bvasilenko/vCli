@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 bvasilenko
 import chalk from "chalk";
 import { loadConfig } from "../config.js";
 import { fetchRegistry } from "../registry/fetch.js";

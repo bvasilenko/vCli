@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 bvasilenko
 import path from "node:path";
 import { generate } from "@booga/vssg";
 import { log } from "../utils/log.js";

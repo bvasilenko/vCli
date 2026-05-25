@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 bvasilenko
 import chalk from "chalk";
 import ora, { type Ora } from "ora";
 

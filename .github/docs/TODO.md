@@ -1,4 +1,28 @@
-# vCli TODO — Issue #21
+# vCli TODO — Issue #22 (cycle 0.1.3)
+
+## P0 — Blocking (0.1.3: `booga demo` + `vblocks-marketing` template)
+
+- [ ] !ONLY FOR VM-5 [contribot-vCli]: FOCUS ON THIS! `src/commands/demo.ts` — spawn Node `http.createServer` on a free port, serve bundled `demo-dist/`, open browser via `open` package; exit 0 after browser open or N seconds.
+- [ ] !ONLY FOR VM-5 [contribot-vCli]: FOCUS ON THIS! `src/template/files-vblocks-marketing/` — pre-populated Vite+React+vBlocks scaffold (HeroSplit + FeaturesGrid + CtaCentered + FooterSplit at default content, real photos via picsum swap, tailwind preset wired to `@booga/vtheme/preset` + `dslSafelist`).
+- [ ] !ONLY FOR VM-5 [contribot-vCli]: FOCUS ON THIS! `src/commands/init.ts` — add `--template <name>` flag; reads `src/template/files-<name>/`; default = `default`.
+- [ ] !ONLY FOR VM-5 [contribot-vCli]: FOCUS ON THIS! `package.json` — add `open ^10` dep; `files` adds `demo-dist/`.
+- [ ] !ONLY FOR VM-5 [contribot-vCli]: FOCUS ON THIS! Build pipeline: produce `demo-dist/` (vite build inside `demo/` then copy `demo/dist` → `demo-dist/` at package root), include in npm tarball.
+- [ ] !ONLY FOR VM-5 [contribot-vCli]: FOCUS ON THIS! `tests/demo-cmd.test.ts` — verify `booga demo` spawns server, prints URL, exits 0.
+- [ ] !ONLY FOR VM-5 [contribot-vCli]: FOCUS ON THIS! `tests/demo-cmd.spec.ts` (Playwright) — served page contains ≥ 4 vBlocks sections, `bg-background` + `bg-card` + `grid-cols-*` role classes present, 0 page errors.
+- [ ] !ONLY FOR VM-5 [contribot-vCli]: FOCUS ON THIS! `tests/init-vblocks.test.ts` — `booga init my-site --template=vblocks-marketing` produces a project whose `npm run dev` serves a styled vBlocks landing page.
+- [ ] !ONLY FOR VM-5 [contribot-vCli]: FOCUS ON THIS! `tests/init-default.test.ts` — no regression on the default scaffold (still empty Vite+React+Tailwind+vUi starter).
+- [ ] !ONLY FOR VM-5 [contribot-vCli]: FOCUS ON THIS! README — top of file: `npx @booga/vcli demo` as the headline command. Then the `init`/`add`/`build`/`check` table.
+- [ ] !ONLY FOR VM-5 [contribot-vCli]: FOCUS ON THIS! CHANGELOG entry for 0.1.3 ("`booga demo` zero-install demo + `init --template=vblocks-marketing` populated scaffold").
+- [ ] !ONLY FOR VM-5 [contribot-vCli]: FOCUS ON THIS! Bump `package.json:version` to `0.1.3`.
+
+## P1 — Significant (0.1.3 hygiene)
+
+- [ ] !ONLY FOR VM-5 [contribot-vCli]: FOCUS ON THIS! `tests/scrub.test.ts` (if applicable) — ensure new template files-vblocks-marketing/* do not contain donor leaks (Gate 4) or voice leaks (Gate 5).
+- [ ] !ONLY FOR VM-5 [contribot-vCli]: FOCUS ON THIS! tarball size sanity — surface the bundled `demo-dist/` adds ~265 kB JS + 24 kB CSS; document in CHANGELOG.
+
+---
+
+# Archive — prior cycle (Issue #21, 0.1.0 → 0.1.2)
 
 ## P0 — Blocking (repo bootstrap + build foundation)
 

@@ -1,7 +1,7 @@
 {
   "name": "@booga/vcli",
   "version": "0.1.3",
-  "description": "Component scaffolding CLI. init project, add from registry, build with vSsg, check with vLint.",
+  "description": "Zero-install vBlocks demo and pre-populated scaffold CLI. booga demo previews the marketing page. booga init scaffolds a Vite + React + vBlocks project. add, build, check included.",
   "type": "module",
   "bin": {
     "booga": "./dist/cli.js",

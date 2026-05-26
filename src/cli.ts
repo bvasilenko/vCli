@@ -52,7 +52,7 @@ program
   .option("--package-manager <pm>", "package manager to use", "bun")
   .option(
     "--template <name>",
-    "project template (default, vblocks-marketing)",
+    "project template (default, blank)",
     "default"
   )
   .action(

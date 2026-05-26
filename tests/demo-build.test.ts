@@ -9,12 +9,19 @@ const DEMO_DIR = path.resolve(
   "../demo"
 );
 const DIST_DIR = path.join(DEMO_DIR, "dist");
+const NODE_MODULES_DIR = path.join(DEMO_DIR, "node_modules");
 
 describe("demo vite build", () => {
   let cssFile: string;
   let jsFile: string;
 
   beforeAll(async () => {
+    if (!(await fs.pathExists(NODE_MODULES_DIR))) {
+      await execa("bun", ["install", "--frozen-lockfile"], {
+        cwd: DEMO_DIR,
+        stdio: "pipe",
+      });
+    }
     await fs.remove(DIST_DIR);
     await execa("bun", ["run", "build"], { cwd: DEMO_DIR, stdio: "pipe" });
 

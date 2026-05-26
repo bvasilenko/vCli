@@ -3,8 +3,7 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   test: {
     exclude: [
-      "tests/demo-render.spec.ts",
-      "tests/demo-cmd.spec.ts",
+      "tests/**/*.spec.ts",
       "demo/**",
       "node_modules/**",
     ],
@@ -13,8 +12,8 @@ export default defineConfig({
       include: ["src/**/*.ts"],
       exclude: [
         "src/cli.ts",
-        "src/template/files/**",
-        "src/template/files-vblocks-marketing/**",
+        "src/template/files-blank/**",
+        "src/template/files-default/**",
       ],
       thresholds: {
         lines: 80,

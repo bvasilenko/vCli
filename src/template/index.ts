@@ -5,7 +5,7 @@ import path from "node:path";
 import fs from "fs-extra";
 import { fail } from "../utils/exit.js";
 
-export const VALID_TEMPLATES = ["default", "vblocks-marketing"] as const;
+export const VALID_TEMPLATES = ["default", "blank"] as const;
 export type TemplateName = (typeof VALID_TEMPLATES)[number];
 
 function assertValidTemplate(name: string): asserts name is TemplateName {

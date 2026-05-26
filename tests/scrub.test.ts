@@ -60,10 +60,10 @@ async function findViolations(
 // ─── Template directories under test ─────────────────────────────────────────
 
 const TEMPLATE_DIRS: Array<{ name: string; dir: string }> = [
-  { name: "default", dir: path.join(TEMPLATES_ROOT, "files") },
+  { name: "default", dir: path.join(TEMPLATES_ROOT, "files-default") },
   {
-    name: "vblocks-marketing",
-    dir: path.join(TEMPLATES_ROOT, "files-vblocks-marketing"),
+    name: "blank",
+    dir: path.join(TEMPLATES_ROOT, "files-blank"),
   },
 ];
 

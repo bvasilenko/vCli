@@ -107,19 +107,19 @@ describe("copyTemplate — resolution", () => {
     expect(segments[segments.length - 1]).toBe("default");
   });
 
-  it("source path for 'vblocks-marketing' ends with segment 'vblocks-marketing'", async () => {
-    await copyTemplate(tmpDir, "vblocks-marketing");
+  it("source path for 'blank' ends with segment 'blank'", async () => {
+    await copyTemplate(tmpDir, "blank");
     const [src] = copySpy.mock.calls[0];
     const segments = (src as string).split(path.sep);
-    expect(segments[segments.length - 1]).toBe("vblocks-marketing");
+    expect(segments[segments.length - 1]).toBe("blank");
   });
 
-  it("default template path and marketing template path share the same parent dir", async () => {
+  it("default and blank template paths share the same parent directory", async () => {
     await copyTemplate(tmpDir, "default");
     const [srcDefault] = copySpy.mock.calls[0];
     copySpy.mockClear();
 
-    await copyTemplate(tmpDir, "vblocks-marketing");
+    await copyTemplate(tmpDir, "blank");
     const [srcMarketing] = copySpy.mock.calls[0];
 
     expect(path.dirname(srcDefault as string)).toBe(
@@ -140,8 +140,8 @@ describe("VALID_TEMPLATES", () => {
     expect(VALID_TEMPLATES).toContain("default");
   });
 
-  it("includes 'vblocks-marketing'", () => {
-    expect(VALID_TEMPLATES).toContain("vblocks-marketing");
+  it("includes 'blank'", () => {
+    expect(VALID_TEMPLATES).toContain("blank");
   });
 
   it("is a non-empty readonly tuple", () => {

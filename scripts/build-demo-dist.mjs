@@ -1,15 +1,20 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 bvasilenko
+import { existsSync } from "node:fs";
 import fse from "fs-extra";
 import { execa } from "execa";
 
-const TEMPLATE_SRC = "src/template/files-vblocks-marketing/src";
+const TEMPLATE_SRC = "src/template/files-default/src";
 const DEMO_SRC = "demo/src";
 const DEMO_DIST_SRC = "demo/dist";
 const DEMO_DIST_DEST = "demo-dist";
 
 await fse.copy(TEMPLATE_SRC, DEMO_SRC, { overwrite: true });
 console.log(`Synced ${TEMPLATE_SRC} → ${DEMO_SRC}`);
+
+if (!existsSync("demo/node_modules")) {
+  await execa("bun", ["install", "--frozen-lockfile"], { cwd: "demo", stdio: "inherit" });
+}
 
 await execa("bun", ["run", "build"], { cwd: "demo", stdio: "inherit" });
 

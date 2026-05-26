@@ -2,6 +2,7 @@
 // Copyright (c) 2026 bvasilenko
 
 import { execSync } from "node:child_process";
+import { randomBytes } from "node:crypto";
 import { writeFileSync, unlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -21,14 +22,15 @@ function run(
   }).trim();
 }
 
+function uniqueTempPath(): string {
+  return path.join(tmpdir(), `git-msg-${randomBytes(8).toString("hex")}.txt`);
+}
+
 function withTempMessageFile<T>(
   message: string,
   fn: (filePath: string) => T,
 ): T {
-  const filePath = path.join(
-    tmpdir(),
-    `git-msg-${process.pid}-${Date.now()}.txt`,
-  );
+  const filePath = uniqueTempPath();
   writeFileSync(filePath, message, "utf8");
   try {
     return fn(filePath);
@@ -36,7 +38,7 @@ function withTempMessageFile<T>(
     try {
       unlinkSync(filePath);
     } catch (e) {
-      // Tolerate already-removed temp file (CI tmp-cleanup, rapid same-ms calls).
+      // ENOENT: OS tmp-cleanup removed the file before the finally block ran.
       if ((e as NodeJS.ErrnoException).code !== "ENOENT") throw e;
     }
   }

@@ -51,6 +51,11 @@ describe("findAuthoredSourceFiles", () => {
       expect(await findAuthoredSourceFiles(root)).toContain("c.js");
     });
 
+    it("returns .mjs files", async () => {
+      await touch(root, "e.mjs");
+      expect(await findAuthoredSourceFiles(root)).toContain("e.mjs");
+    });
+
     it("returns .css files", async () => {
       await touch(root, "d.css");
       expect(await findAuthoredSourceFiles(root)).toContain("d.css");
@@ -96,6 +101,30 @@ describe("findAuthoredSourceFiles", () => {
       "excludes files under prefix '%s'",
       async (prefix) => {
         await touch(root, `${prefix}file.ts`);
+        expect(await findAuthoredSourceFiles(root)).toHaveLength(0);
+      },
+    );
+
+    it.each([...EXCLUDED_PATH_PREFIXES])(
+      "excludes files directly inside '%s/' directory",
+      async (prefix) => {
+        await touch(root, `${prefix}/file.ts`);
+        expect(await findAuthoredSourceFiles(root)).toHaveLength(0);
+      },
+    );
+
+    it.each([...EXCLUDED_PATH_PREFIXES])(
+      "excludes files inside a hyphenated variant '%s-<name>/' directory",
+      async (prefix) => {
+        await touch(root, `${prefix}-variant/file.ts`);
+        expect(await findAuthoredSourceFiles(root)).toHaveLength(0);
+      },
+    );
+
+    it.each([...EXCLUDED_PATH_PREFIXES])(
+      "excludes deeply nested files inside any '%s*/' directory tree",
+      async (prefix) => {
+        await touch(root, `${prefix}-variant/src/components/widget.ts`);
         expect(await findAuthoredSourceFiles(root)).toHaveLength(0);
       },
     );
@@ -223,5 +252,13 @@ describe("findSpdxBearingFiles", () => {
       await touch(root, "b.js", "module.exports = {};\n");
       expect(await findSpdxBearingFiles(root)).toHaveLength(0);
     });
+
+    it.each([...EXCLUDED_PATH_PREFIXES])(
+      "does not surface SPDX-bearing files located under excluded prefix '%s'",
+      async (prefix) => {
+        await touch(root, `${prefix}-variant/licensed.ts`, SPDX_BLOCK);
+        expect(await findSpdxBearingFiles(root)).toHaveLength(0);
+      },
+    );
   });
 });

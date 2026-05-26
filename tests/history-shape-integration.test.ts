@@ -41,6 +41,7 @@ async function buildFixtureRepo(dir: string): Promise<void> {
   await touch(dir, "src/utils.ts", SPDX_BLOCK + "export const util = true;\n");
   await touch(dir, "src/config.ts", "export const config = true;\n");
   await touch(dir, "tests/app.test.ts", SPDX_BLOCK + "// test\n");
+  await touch(dir, "scripts/build.mjs", SPDX_BLOCK + "// build script\n");
   await touch(dir, LICENSE_FILENAME, "MIT License\nCopyright (c) 2026 bvasilenko\n");
 
   git("add -A", dir);
@@ -126,6 +127,16 @@ describe("applyHistoryShape — full reshape", () => {
     it("SPDX is stripped from all SPDX-bearing files in Commit A — not just src/", () => {
       const content = git("show HEAD~1:tests/app.test.ts", repo);
       expect(content).not.toContain(SPDX_HEADER_LINES[0]);
+    });
+
+    it(".mjs files have their SPDX header stripped in Commit A", () => {
+      const content = git("show HEAD~1:scripts/build.mjs", repo);
+      expect(content).not.toContain(SPDX_HEADER_LINES[0]);
+    });
+
+    it(".mjs files have their SPDX header restored in Commit B", () => {
+      const content = git("show HEAD:scripts/build.mjs", repo);
+      expect(content.startsWith(SPDX_BLOCK)).toBe(true);
     });
   });
 

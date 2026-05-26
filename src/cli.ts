@@ -8,6 +8,7 @@ import { runAdd } from "./commands/add.js";
 import { runList } from "./commands/list.js";
 import { runBuild } from "./commands/build.js";
 import { runCheck } from "./commands/check.js";
+import { runDemo } from "./commands/demo.js";
 
 const { version } = JSON.parse(
   readFileSync(new URL("../package.json", import.meta.url), "utf-8")
@@ -32,11 +33,36 @@ const program = new Command()
   .option("--offline", "skip CDN fetch and use locally installed registry", false);
 
 program
+  .command("demo")
+  .description("serve the bundled vBlocks marketing demo (zero install)")
+  .option("--no-open", "skip opening the browser (CI / headless mode)")
+  .option("--port <number>", "port to listen on (default: random free port)")
+  .action((opts: { open: boolean; port?: string }) =>
+    run(() =>
+      runDemo({
+        noOpen: !opts.open,
+        port: opts.port !== undefined ? parseInt(opts.port, 10) : undefined,
+      })
+    )
+  );
+
+program
   .command("init [name]")
   .description("scaffold a Vite+React+Tailwind+vUi project")
   .option("--package-manager <pm>", "package manager to use", "bun")
-  .action((name: string | undefined, opts: { packageManager: string }) =>
-    run(() => runInit(name, { packageManager: opts.packageManager }))
+  .option(
+    "--template <name>",
+    "project template (default, vblocks-marketing)",
+    "default"
+  )
+  .action(
+    (name: string | undefined, opts: { packageManager: string; template: string }) =>
+      run(() =>
+        runInit(name, {
+          packageManager: opts.packageManager,
+          template: opts.template,
+        })
+      )
   );
 
 program

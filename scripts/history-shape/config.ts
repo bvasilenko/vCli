@@ -25,6 +25,7 @@ export const AUTHORED_EXTENSIONS: ReadonlySet<string> = new Set([
   ".ts",
   ".tsx",
   ".js",
+  ".mjs",
   ".css",
 ]);
 
@@ -37,6 +38,5 @@ export const EXCLUDED_DIRNAMES: ReadonlySet<string> = new Set([
 ]);
 
 export const EXCLUDED_PATH_PREFIXES: readonly string[] = [
-  "demo/out/",
-  "src/template/files/",
+  "src/template/files",
 ];

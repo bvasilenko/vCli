@@ -117,6 +117,12 @@ describe("createOrphanBranch", () => {
     createOrphanBranch(repo, "orphan-test");
     expect(await fs.pathExists(path.join(repo, "seed.txt"))).toBe(true);
   });
+
+  it("staged index carries over all files from the parent HEAD commit", () => {
+    createOrphanBranch(repo, "orphan-test");
+    const staged = git("diff --cached --name-only", repo);
+    expect(staged).toContain("seed.txt");
+  });
 });
 
 describe("stageAll", () => {
@@ -144,6 +150,13 @@ describe("stageAll", () => {
     stageAll(repo);
     const staged = git("diff --cached --name-only", repo);
     expect(staged).toContain("seed.txt");
+  });
+
+  it("deleted tracked file appears staged as a removal", async () => {
+    await fs.remove(path.join(repo, "seed.txt"));
+    stageAll(repo);
+    const status = git("diff --cached --name-status", repo);
+    expect(status).toMatch(/^D\tseed\.txt$/m);
   });
 });
 
@@ -235,6 +248,25 @@ describe("commitNow", () => {
     const authorDate = new Date(authorDateStr).getTime();
     expect(authorDate).toBeGreaterThanOrEqual(before - 1000);
   });
+
+  it("committer date is also current (within 60 seconds of now)", async () => {
+    await fs.writeFile(path.join(repo, "b.ts"), "b\n", "utf8");
+    stageAll(repo);
+    const before = Date.now();
+    commitNow(repo, "now commit");
+    const committerDateStr = git("log -1 --format=%cI", repo);
+    const committerDate = new Date(committerDateStr).getTime();
+    expect(committerDate).toBeGreaterThanOrEqual(before - 1000);
+  });
+
+  it("stores a multi-line message with subject and body", async () => {
+    const message = "subject line\n\nbody paragraph";
+    await fs.writeFile(path.join(repo, "b.ts"), "b\n", "utf8");
+    stageAll(repo);
+    commitNow(repo, message);
+    const stored = git("log -1 --format=%B", repo).trim();
+    expect(stored).toBe(message);
+  });
 });
 
 describe("deleteBranch", () => {
@@ -291,5 +323,67 @@ describe("renameBranch", () => {
   it("the old name is absent after rename", () => {
     renameBranch(repo, "old-name", "new-name");
     expect(branchExists(repo, "old-name")).toBe(false);
+  });
+
+  it("currentBranch reports the new name when renamed while checked out", () => {
+    renameBranch(repo, "old-name", "new-name");
+    expect(currentBranch(repo)).toBe("new-name");
+  });
+
+  it("HEAD commit SHA is unchanged after rename", () => {
+    const shaBefore = git("rev-parse HEAD", repo);
+    renameBranch(repo, "old-name", "new-name");
+    expect(git("rev-parse HEAD", repo)).toBe(shaBefore);
+  });
+});
+
+describe("commitNow — successive invocations across independent repos", () => {
+  it("all N invocations complete and each repo has exactly one commit", async () => {
+    const N = 8;
+    const dirs = await Promise.all(
+      Array.from({ length: N }, async (_, i) => {
+        const dir = await fs.mkdtemp(path.join(os.tmpdir(), "vcli-successive-"));
+        await initRepo(dir);
+        await fs.writeFile(path.join(dir, `f${i}.ts`), "x\n", "utf8");
+        git("add -A", dir);
+        return dir;
+      }),
+    );
+    try {
+      for (const dir of dirs) {
+        commitNow(dir, "successive");
+      }
+      for (const dir of dirs) {
+        expect(git("rev-list --count HEAD", dir)).toBe("1");
+      }
+    } finally {
+      await Promise.all(dirs.map((dir) => fs.remove(dir)));
+    }
+  });
+});
+
+describe("commitWithDate — successive invocations across independent repos", () => {
+  it("all N invocations complete and each repo has exactly one commit", async () => {
+    const N = 8;
+    const isoDate = "2017-04-10T00:00:00+03:00";
+    const dirs = await Promise.all(
+      Array.from({ length: N }, async (_, i) => {
+        const dir = await fs.mkdtemp(path.join(os.tmpdir(), "vcli-successive-"));
+        await initRepo(dir);
+        await fs.writeFile(path.join(dir, `f${i}.ts`), "x\n", "utf8");
+        git("add -A", dir);
+        return dir;
+      }),
+    );
+    try {
+      for (const dir of dirs) {
+        commitWithDate(dir, "successive", isoDate);
+      }
+      for (const dir of dirs) {
+        expect(git("rev-list --count HEAD", dir)).toBe("1");
+      }
+    } finally {
+      await Promise.all(dirs.map((dir) => fs.remove(dir)));
+    }
   });
 });

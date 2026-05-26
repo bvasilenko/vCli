@@ -10,6 +10,7 @@ import { fail } from "../utils/exit.js";
 
 export interface InitOptions {
   packageManager?: string;
+  template?: string;
   cwd?: string;
 }
 
@@ -31,8 +32,9 @@ export async function runInit(
 
   await fs.ensureDir(targetDir);
 
+  const template = opts.template ?? "default";
   const spin = spinner("Scaffolding project");
-  await copyTemplate(targetDir);
+  await copyTemplate(targetDir, template);
   spin.succeed("Scaffolded");
 
   const pm = (opts.packageManager ?? "bun") as VcliConfig["packageManager"];

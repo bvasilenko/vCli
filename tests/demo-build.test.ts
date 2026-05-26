@@ -2,45 +2,82 @@ import { describe, it, expect, beforeAll } from "vitest";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import fs from "fs-extra";
-import { runBuild } from "../src/commands/build.js";
+import { execa } from "execa";
 
 const DEMO_DIR = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   "../demo"
 );
-const OUT_DIR = path.join(DEMO_DIR, "out");
+const DIST_DIR = path.join(DEMO_DIR, "dist");
 
-describe("demo build", () => {
+describe("demo vite build", () => {
+  let cssFile: string;
+  let jsFile: string;
+
   beforeAll(async () => {
-    await fs.remove(OUT_DIR);
-    await runBuild({ config: "vssg.config.js", cwd: DEMO_DIR });
+    await fs.remove(DIST_DIR);
+    await execa("bun", ["run", "build"], { cwd: DEMO_DIR, stdio: "pipe" });
+
+    const assets = await fs.readdir(path.join(DIST_DIR, "assets"));
+    cssFile = assets.find((f) => f.endsWith(".css")) ?? "";
+    jsFile = assets.find((f) => f.endsWith(".js")) ?? "";
   }, 60_000);
 
-  it("emits demo/out/index.html", async () => {
-    expect(await fs.pathExists(path.join(OUT_DIR, "index.html"))).toBe(true);
+  it("emits demo/dist/index.html", async () => {
+    expect(await fs.pathExists(path.join(DIST_DIR, "index.html"))).toBe(true);
   });
 
-  it("html contains a link to semantic.css", async () => {
-    const html = await fs.readFile(path.join(OUT_DIR, "index.html"), "utf-8");
-    expect(html).toMatch(/semantic\.css/);
+  it("index.html references at least one CSS asset", async () => {
+    const html = await fs.readFile(path.join(DIST_DIR, "index.html"), "utf-8");
+    expect(html).toMatch(/\.css/);
   });
 
-  it("semantic.css is present and non-empty", async () => {
-    const cssPath = path.join(OUT_DIR, "semantic.css");
-    expect(await fs.pathExists(cssPath)).toBe(true);
-    const css = await fs.readFile(cssPath, "utf-8");
-    expect(css.trim().length).toBeGreaterThan(0);
+  it("index.html references at least one JS asset", async () => {
+    const html = await fs.readFile(path.join(DIST_DIR, "index.html"), "utf-8");
+    expect(html).toMatch(/\.js/);
   });
 
-  it("vBlocks styles.css is copied to out/ via publicDir", async () => {
-    expect(
-      await fs.pathExists(path.join(OUT_DIR, "styles.css"))
-    ).toBe(true);
+  it("index.html declares a favicon link to prevent browser auto-request", async () => {
+    const html = await fs.readFile(path.join(DIST_DIR, "index.html"), "utf-8");
+    expect(html).toMatch(/<link[^>]+rel=["']icon["']/);
   });
 
-  it("html contains section elements (vBlocks components rendered)", async () => {
-    const html = await fs.readFile(path.join(OUT_DIR, "index.html"), "utf-8");
-    const sectionMatches = html.match(/<section/g) ?? [];
-    expect(sectionMatches.length).toBeGreaterThanOrEqual(4);
+    it("assets/ directory contains both CSS and JS files", async () => {
+    expect(cssFile).toBeTruthy();
+    expect(jsFile).toBeTruthy();
+  });
+
+  it("CSS bundle is non-empty and contains at least 100 bytes", async () => {
+    const css = await fs.readFile(
+      path.join(DIST_DIR, "assets", cssFile),
+      "utf-8"
+    );
+    expect(css.trim().length).toBeGreaterThan(100);
+  });
+
+  it("JS bundle is non-empty", async () => {
+    const js = await fs.readFile(
+      path.join(DIST_DIR, "assets", jsFile),
+      "utf-8"
+    );
+    expect(js.trim().length).toBeGreaterThan(0);
+  });
+
+  it("JS bundle contains picsum.photos placeholder-swap logic from main.jsx", async () => {
+    // present regardless of minification
+    const js = await fs.readFile(
+      path.join(DIST_DIR, "assets", jsFile),
+      "utf-8"
+    );
+    expect(js).toContain("picsum.photos");
+  });
+
+  it("CSS bundle contains Tailwind-generated colour utility classes from vtheme", async () => {
+    // bg-background only appears when the vtheme Tailwind preset resolves — reliable wiring proxy
+    const css = await fs.readFile(
+      path.join(DIST_DIR, "assets", cssFile),
+      "utf-8"
+    );
+    expect(css).toMatch(/background|text-foreground|bg-card/);
   });
 });

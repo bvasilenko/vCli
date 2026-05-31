@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-05-31
+
+### Changed
+
+- Demo and default `init` template bumped to the 2026-05-31 v-suite richness wave: `@booga/vtheme` ^0.3.0, `@booga/vdsl` ^0.3.0, `@booga/vui` ^0.4.0, `@booga/vblocks` ^0.4.0. Typography (Playfair Display serif scale), tone palette (ok / warn / bad / info / meta x bg / fg / soft), section padding (`density: spacious | normal | compact`), and primitive sizing all flow from the upstream packages; vCli authors zero leaf-CSS overrides per the "Demo richness flows upstream first" convention.
+- `demo/src/main.jsx` and `src/template/files-default/src/main.jsx` rewritten to the proposal-rich vocabulary: kicker, eyebrow, lead, tonePills. The hero communicates the vCli thesis ("zero-install demo + populated scaffold CLI"); FeaturesGrid lists the five commands vCli actually ships (`demo`, `init`, `add`, `build`, `check`); CtaCentered surfaces the explicit `npx @booga/vcli demo` command; FooterSplit links npm + GitHub + vBlocks + vTheme docs. A `BrandMarkStrip` mirrors the vBrand 0.3.0 demo pattern: Kicker + Eyebrow + Pill cluster above the hero so the version + the two consumer-facing commands are visible without scrolling.
+- Per the zero-drift invariant, the source-of-truth for the demo lives at `src/template/files-default/src/`; `scripts/build-demo-dist.mjs` syncs it into `demo/src/` before the Vite build runs. The preview surfaced by `booga demo` and the scaffold written by `booga init` cannot drift.
+
+### Added
+
+- StackBlitz badge in `README.md` opens `demo/` (the demo source) in a live one-click sandbox.
+
 ## [0.1.3] - 2026-05-26
 
 ### Added

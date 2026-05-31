@@ -6,6 +6,10 @@ Scaffold a pre-populated Vite + React + vBlocks project with one command. Add co
 
 Shadcn-style add: source lives in your repo, no runtime dep on the CLI.
 
+[![Open demo in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/bvasilenko/vCli/tree/main/demo)
+
+The StackBlitz badge opens the `demo/` source (the exact composition `booga demo` serves) in a live one-click sandbox. The local-shell equivalent is `npx @booga/vcli demo`, which spawns a Node HTTP server on a free port and opens your browser to the bundled preview.
+
 ## Quickstart
 
 ```sh

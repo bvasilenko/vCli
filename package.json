@@ -1,6 +1,6 @@
 {
   "name": "@booga/vcli",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "Zero-install vBlocks demo and pre-populated scaffold CLI. booga demo previews the marketing page. booga init scaffolds a Vite + React + vBlocks project. add, build, check included.",
   "type": "module",
   "bin": {

@@ -70,13 +70,19 @@ describe("demo vite build", () => {
     expect(js.trim().length).toBeGreaterThan(0);
   });
 
-  it("JS bundle contains picsum.photos placeholder-swap logic from main.jsx", async () => {
-    // present regardless of minification
+  it("JS bundle contains the proposal-rich vCli vocabulary from main.jsx", async () => {
+    // The 0.2.0 facelift removed the picsum.photos placeholder swap (the demo
+    // no longer renders user-facing photo placeholders; a 1x1 transparent
+    // pixel satisfies the strict hero image schema). Instead, the JS bundle
+    // must carry the literal command strings vCli ships, so the rendered DOM
+    // tree exposes them to a visitor without indirection.
     const js = await fs.readFile(
       path.join(DIST_DIR, "assets", jsFile),
       "utf-8"
     );
-    expect(js).toContain("picsum.photos");
+    expect(js).toContain("npx @booga/vcli demo");
+    expect(js).toContain("npx @booga/vcli init my-site");
+    expect(js).toContain("vCli 0.2.0");
   });
 
   it("CSS bundle contains Tailwind-generated colour utility classes from vtheme", async () => {

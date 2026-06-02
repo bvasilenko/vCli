@@ -1,0 +1,16 @@
+{
+  "name": "My Brand",
+  "voice": {
+    "canonical": "We help teams build faster.",
+    "repoDescription": "Brand assets for my project."
+  },
+  "assets": {
+    "favicon": { "source": "favicon.svg", "sizes": [32, 64] },
+    "og": { "dimensions": [1200, 630] },
+    "icons": { "source": "icons.svg", "set": [] }
+  },
+  "tokens": {
+    "color": { "primary": "#6366f1" },
+    "type": { "sans": "Inter, sans-serif" }
+  }
+}

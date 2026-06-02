@@ -30,3 +30,12 @@ export { runCheck } from "./commands/check.js";
 export type { CheckOptions } from "./commands/check.js";
 
 export { VcliError, fail } from "./utils/exit.js";
+
+export { runScaffold } from "./commands/scaffold.js";
+export type { ScaffoldOptions, AppType } from "./commands/scaffold.js";
+
+export { runCompose } from "./commands/compose.js";
+export type { ComposeOptions } from "./commands/compose.js";
+
+export { parseBrandHandle } from "./brand/handle.js";
+export type { BrandHandle } from "./brand/handle.js";

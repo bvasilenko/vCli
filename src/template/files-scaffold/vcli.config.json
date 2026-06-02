@@ -1,0 +1,5 @@
+{
+  "registry": "https://cdn.jsdelivr.net/npm/@booga/vRegistry@latest/dist/registry.json",
+  "componentsDir": "src/components",
+  "packageManager": "bun"
+}

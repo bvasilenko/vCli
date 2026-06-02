@@ -9,6 +9,8 @@ import { runList } from "./commands/list.js";
 import { runBuild } from "./commands/build.js";
 import { runCheck } from "./commands/check.js";
 import { runDemo } from "./commands/demo.js";
+import { runScaffold } from "./commands/scaffold.js";
+import { runCompose } from "./commands/compose.js";
 
 const { version } = JSON.parse(
   readFileSync(new URL("../package.json", import.meta.url), "utf-8")
@@ -103,5 +105,38 @@ program
   .command("check")
   .description("run vLint over project source")
   .action(() => run(() => runCheck()));
+
+program
+  .command("scaffold [name]")
+  .description("scaffold a brand-driven vite+react project from a brand source")
+  .requiredOption("--brand <handle>", "brand source (url:|fixture:|github:|npm:|json:|file:)")
+  .option("--app <type>", "app type (landing, marketing, docs, dashboard)", "landing")
+  .option("--package-manager <pm>", "package manager to use", "bun")
+  .option("--no-install", "skip dependency installation")
+  .action(
+    (name: string | undefined, opts: { brand: string; app: string; packageManager: string; install: boolean }) =>
+      run(() =>
+        runScaffold(name, {
+          brand: opts.brand,
+          app: opts.app,
+          packageManager: opts.packageManager,
+          noInstall: !opts.install,
+        })
+      )
+  );
+
+program
+  .command("compose")
+  .description("open CompositionEditor in browser; reads/writes composition.json")
+  .option("--port <number>", "port to listen on (default: random free port)")
+  .option("--no-open", "skip opening the browser")
+  .action((opts: { port?: string; open: boolean }) =>
+    run(() =>
+      runCompose({
+        port: opts.port !== undefined ? parseInt(opts.port, 10) : undefined,
+        noOpen: !opts.open,
+      })
+    )
+  );
 
 program.parse();

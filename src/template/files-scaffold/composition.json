@@ -1,0 +1,8 @@
+{
+  "sections": [
+    { "id": "hero", "visible": true, "density": "regular", "order": 0 },
+    { "id": "features", "visible": true, "density": "regular", "order": 1 },
+    { "id": "cta", "visible": true, "density": "regular", "order": 2 },
+    { "id": "footer", "visible": true, "density": "regular", "order": 3 }
+  ]
+}

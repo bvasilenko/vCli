@@ -18,12 +18,37 @@ export interface StaticServerHandle {
   url: string;
 }
 
-export function serveDir(dir: string): StaticServerHandle {
+export interface ServeDirOptions {
+  /**
+   * Strip this URL prefix before resolving files.
+   * Used when the Vite build was produced with a non-root `base` (e.g. "/vCli/").
+   */
+  stripBase?: string;
+  /**
+   * Serve index.html for requests whose resolved path has no file extension
+   * and maps to no existing file (SPA client-side routing support).
+   */
+  spaFallback?: boolean;
+}
+
+function resolveUrlPath(rawUrl: string, opts: ServeDirOptions): string {
+  const withoutQuery = rawUrl.split("?")[0].split("#")[0];
+  const stripped =
+    opts.stripBase && withoutQuery.startsWith(opts.stripBase)
+      ? withoutQuery.slice(opts.stripBase.length) || "/"
+      : withoutQuery;
+  return stripped === "/" ? "/index.html" : stripped;
+}
+
+export function serveDir(
+  dir: string,
+  opts: ServeDirOptions = {}
+): StaticServerHandle {
   const rootDir = path.resolve(dir);
 
   const server = createServer((req, res) => {
-    const rawUrl = req.url === "/" ? "/index.html" : (req.url ?? "/index.html");
-    const filePath = path.resolve(rootDir, "." + rawUrl);
+    const urlPath = resolveUrlPath(req.url ?? "/", opts);
+    const filePath = path.resolve(rootDir, "." + urlPath);
 
     if (!filePath.startsWith(rootDir + path.sep) && filePath !== rootDir) {
       res.writeHead(403);
@@ -32,6 +57,14 @@ export function serveDir(dir: string): StaticServerHandle {
     }
 
     if (!fs.pathExistsSync(filePath)) {
+      if (opts.spaFallback && !extname(urlPath)) {
+        const indexPath = path.join(rootDir, "index.html");
+        if (fs.pathExistsSync(indexPath)) {
+          res.writeHead(200, { "Content-Type": MIME[".html"] });
+          createReadStream(indexPath).pipe(res);
+          return;
+        }
+      }
       res.writeHead(404);
       res.end();
       return;

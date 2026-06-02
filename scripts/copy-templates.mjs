@@ -8,4 +8,6 @@ await fse.copy(
   "dist/templates/blank"
 );
 
+await fse.copy("src/template/files-scaffold", "dist/templates/scaffold");
+
 console.log("Templates copied to dist/templates/");

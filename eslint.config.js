@@ -10,5 +10,9 @@ export default tseslint.config(...tseslint.configs.recommended, {
     "src/template/files-vblocks-marketing/**",
     "coverage/**",
     "scripts/**",
+    "compose-ui/**",
+    "compose-dist/**",
+    "examples/**",
+    "src/template/files-scaffold/**",
   ],
 });

@@ -240,6 +240,21 @@ describe("buildRequestHandler — routing", () => {
       expect(await res.text()).toBe("<html>fallback</html>");
     });
   });
+
+  it("serves index.html when req.url is null or undefined", async () => {
+    await fs.writeFile(path.join(tmpDir, "index.html"), "<html>null-fallback</html>");
+    const handler = buildRequestHandler(tmpDir);
+    const statuses: number[] = [];
+    const { PassThrough } = await import("node:stream");
+    const sink = new PassThrough();
+    sink.resume();
+    const fakeRes = Object.assign(sink, {
+      writeHead: (code: number) => statuses.push(code),
+    }) as unknown as http.ServerResponse;
+    handler({ url: undefined } as http.IncomingMessage, fakeRes);
+    await new Promise<void>((r) => sink.once("end", r));
+    expect(statuses[0]).toBe(200);
+  });
 });
 
 describe("buildRequestHandler — MIME types", () => {

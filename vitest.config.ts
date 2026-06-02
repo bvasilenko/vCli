@@ -5,7 +5,9 @@ export default defineConfig({
     exclude: [
       "tests/**/*.spec.ts",
       "demo/**",
-      "node_modules/**",
+      "**/node_modules/**",
+      "compose-ui/**",
+      "examples/**",
     ],
     coverage: {
       provider: "v8",

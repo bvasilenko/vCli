@@ -1,6 +1,6 @@
 {
   "name": "@booga/vcli",
-  "version": "0.2.0",
+  "version": "0.3.0-alpha.1",
   "description": "Zero-install vBlocks demo and pre-populated scaffold CLI. booga demo previews the marketing page. booga init scaffolds a Vite + React + vBlocks project. add, build, check included.",
   "type": "module",
   "bin": {
@@ -18,10 +18,11 @@
   },
   "files": [
     "dist/",
-    "demo-dist/"
+    "demo-dist/",
+    "compose-dist/"
   ],
   "scripts": {
-    "build": "tsup && node scripts/copy-templates.mjs && node scripts/build-demo-dist.mjs",
+    "build": "tsup && node scripts/copy-templates.mjs && node scripts/build-demo-dist.mjs && node scripts/build-compose-dist.mjs",
     "dev": "tsup --watch",
     "test": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
@@ -29,9 +30,15 @@
     "shape-history": "bun run scripts/history-shape/index.ts"
   },
   "dependencies": {
+    "@booga/vblocks": "^0.4.0",
+    "@booga/vbrand": "^0.4.0-alpha.2",
+    "@booga/vdsl": "^0.3.0",
+    "@booga/vfixtures": "^0.1.1",
     "@booga/vlint": "^0.1.0",
     "@booga/vregistry": "^0.1.0",
     "@booga/vssg": "^0.1.0",
+    "@booga/vtheme": "^0.3.0",
+    "@booga/vui": "^0.4.0",
     "chalk": "^5.3.0",
     "commander": "^12.1.0",
     "execa": "^8.0.1",
@@ -48,6 +55,7 @@
     "@types/node": "^20.14.2",
     "@types/prompts": "^2.4.9",
     "@vitest/coverage-v8": "^1.6.0",
+    "jszip": "^3.10.1",
     "typescript": "^5.4.5",
     "tsup": "^8.1.0",
     "typescript-eslint": "^8.0.0",

@@ -14,7 +14,8 @@
     "@booga/vtheme": "^0.3.0",
     "@booga/vui": "^0.4.0",
     "react": "^18.3.0",
-    "react-dom": "^18.3.0"
+    "react-dom": "^18.3.0",
+    "@booga/vbrand": "^0.4.0-alpha.2"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.0",

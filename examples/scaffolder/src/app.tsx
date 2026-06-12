@@ -1,4 +1,6 @@
 import React from "react";
+import { VCLI_VERSION } from "./release.js";
+import { interactionCss, scaffolderTheme } from "./scaffolder-theme.js";
 import { useScaffolderState } from "./use-scaffolder-state.js";
 import { BrandPanel, CompositionPanel, PreviewPanel } from "./panels.js";
 
@@ -12,34 +14,50 @@ export function App() {
         display: "flex",
         flexDirection: "column",
         height: "100vh",
-        backgroundColor: "oklch(98% .005 240)",
-        color: "oklch(12% .01 240)",
+        backgroundColor: scaffolderTheme.surface.app,
+        color: scaffolderTheme.surface.ink,
       }}
     >
-      <style>{
-        `.sfc-btn-load:hover{filter:brightness(0.93);}` +
-        `.sfc-btn-load:focus-visible{outline:2px solid oklch(55% .2 250);outline-offset:2px;}` +
-        `.sfc-btn-load:active{filter:brightness(0.88);}` +
-        `.sfc-btn-download:hover:not(:disabled){filter:brightness(0.88);}` +
-        `.sfc-btn-download:focus-visible{outline:2px solid oklch(55% .2 250);outline-offset:2px;}` +
-        `.sfc-btn-download:active:not(:disabled){filter:brightness(0.80);}` +
-        `.sfc-select:focus-visible,.sfc-input:focus-visible{outline:2px solid oklch(55% .2 250);outline-offset:2px;border-color:oklch(55% .2 250);}`
-      }</style>
+      <style>{interactionCss}</style>
 
       <header
         style={{
-          padding: "0.75rem 1rem",
-          borderBottom: "1px solid oklch(90% .008 240)",
+          padding: `${scaffolderTheme.space.md} ${scaffolderTheme.space.lg}`,
+          borderBottom: `1px solid ${scaffolderTheme.surface.border}`,
+          borderTop: `3px solid ${scaffolderTheme.surface.accent}`,
           display: "flex",
           alignItems: "center",
-          gap: "0.75rem",
-          backgroundColor: "oklch(98% .005 240)",
+          gap: scaffolderTheme.space.md,
+          backgroundColor: scaffolderTheme.surface.panel,
+          boxShadow: scaffolderTheme.shadow.sm,
           zIndex: 10,
         }}
       >
-        <span style={{ fontWeight: 700, fontSize: "0.875rem" }}>vCli Scaffolder</span>
-        <span style={{ color: "oklch(55% .015 240)", fontSize: "0.75rem" }}>
-          0.3.0-alpha.1
+        <span
+          style={{
+            fontWeight: 700,
+            fontSize: scaffolderTheme.text.sm,
+            letterSpacing: "-0.025em",
+          }}
+        >
+          vCli Scaffolder
+        </span>
+        <span
+          style={{
+            color: scaffolderTheme.surface.muted,
+            fontSize: scaffolderTheme.text.xs,
+            fontWeight: 700,
+            fontVariantNumeric: "tabular-nums",
+            letterSpacing: "0.1em",
+            textTransform: "uppercase",
+            padding: `${scaffolderTheme.space.xs} ${scaffolderTheme.space.sm}`,
+            border: `1px solid ${scaffolderTheme.surface.border}`,
+            borderRadius: scaffolderTheme.radius.sm,
+            backgroundColor: scaffolderTheme.surface.panel,
+            boxShadow: scaffolderTheme.shadow.sm,
+          }}
+        >
+          {VCLI_VERSION}
         </span>
         <button
           className="sfc-btn-download"
@@ -47,15 +65,19 @@ export function App() {
           disabled={!downloadReady}
           style={{
             marginLeft: "auto",
-            padding: "0.375rem 0.75rem",
-            fontSize: "0.875rem",
-            backgroundColor: "oklch(55% .2 250)",
-            color: "oklch(99% .005 250)",
+            padding: `${scaffolderTheme.space.sm} ${scaffolderTheme.space.md}`,
+            fontSize: scaffolderTheme.text.sm,
+            fontWeight: 700,
+            letterSpacing: "0.04em",
+            textTransform: "uppercase",
+            backgroundColor: scaffolderTheme.surface.accent,
+            color: scaffolderTheme.surface.accentInk,
             border: "none",
-            borderRadius: "0.375rem",
-            cursor: downloadReady ? "pointer" : "default",
+            borderRadius: scaffolderTheme.radius.md,
+            cursor: downloadReady ? "pointer" : "not-allowed",
             opacity: downloadReady ? 1 : 0.5,
-            transition: "opacity 0.15s",
+            boxShadow: downloadReady ? scaffolderTheme.shadow.sm : "none",
+            transition: `filter ${scaffolderTheme.timing.quick}, opacity ${scaffolderTheme.timing.steady}, transform ${scaffolderTheme.timing.quick}, box-shadow ${scaffolderTheme.timing.quick}`,
           }}
         >
           Download scaffold

@@ -9,8 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@booga/vbrand": "^0.4.0-alpha.2",
     "@booga/vblocks": "^0.4.0",
+    "@booga/vbrand": "^0.4.0-alpha.4.2.3",
     "@booga/vdsl": "^0.3.0",
     "@booga/vfixtures": "^0.1.1",
     "@booga/vtheme": "^0.3.0",

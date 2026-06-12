@@ -1,45 +1,36 @@
 import JSZip from "jszip";
 import type { VbrandType } from "@booga/vbrand";
 import type { CompositionSpec } from "@booga/vbrand/composition";
+import scaffoldPackageJsonRaw from "../../../src/template/files-scaffold/package.json?raw";
+import indexHtml from "../../../src/template/files-scaffold/index.html?raw";
+import postcssConfig from "../../../src/template/files-scaffold/postcss.config.js?raw";
+import stylesCss from "../../../src/template/files-scaffold/src/styles.css?raw";
+import mainJsx from "../../../src/template/files-scaffold/src/main.jsx?raw";
+import tailwindConfig from "../../../src/template/files-scaffold/tailwind.config.js?raw";
+import viteConfig from "../../../src/template/files-scaffold/vite.config.js?raw";
+import { VCLI_PACKAGE_NAME, VCLI_VERSION } from "./release.js";
 
-const SCAFFOLD_FILES: Record<string, string> = {
-  "index.html": `<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" href="data:," />
-    <title>My App</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
-</html>`,
-  "vite.config.js": `import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-export default defineConfig({ plugins: [react()] });`,
-  "postcss.config.js": `export default { plugins: { tailwindcss: {}, autoprefixer: {} } };`,
-  "tailwind.config.js": `import vtheme from "@booga/vtheme/preset";
-import { dslSafelist } from "@booga/vdsl";
-export default {
-  content: ["./index.html", "./src/**/*.{js,jsx}"],
-  presets: [vtheme],
-  safelist: dslSafelist,
-};`,
-  "src/styles.css": "@tailwind base;\n@tailwind components;\n@tailwind utilities;",
-  "src/main.jsx": `import "./styles.css";
-import React from "react";
-import { createRoot } from "react-dom/client";
-import { getTemplate, isTemplateId } from "@booga/vbrand/templates";
-import rawBrand from "../brand.json";
-import rawComposition from "../composition.json";
-import scaffoldConfig from "../scaffold.json";
-const appType = isTemplateId(scaffoldConfig.appType) ? scaffoldConfig.appType : "landing";
-createRoot(document.getElementById("root")).render(
-  React.createElement(React.StrictMode, null, getTemplate(appType).compose(rawBrand, rawComposition))
-);`,
-  "vcli.config.json": JSON.stringify(
+const CANONICAL_SCAFFOLD_FILES: ReadonlyArray<readonly [string, string]> = [
+  ["index.html", indexHtml],
+  ["vite.config.js", viteConfig],
+  ["postcss.config.js", postcssConfig],
+  ["tailwind.config.js", tailwindConfig],
+  ["src/styles.css", stylesCss],
+  ["src/main.jsx", mainJsx],
+];
+
+interface ScaffoldPackageJson {
+  readonly dependencies?: Record<string, string>;
+  readonly devDependencies?: Record<string, string>;
+  readonly [key: string]: unknown;
+}
+
+function readCanonicalPackageJson(): ScaffoldPackageJson {
+  return JSON.parse(scaffoldPackageJsonRaw) as ScaffoldPackageJson;
+}
+
+function buildVcliConfigJson(): string {
+  return JSON.stringify(
     {
       registry:
         "https://cdn.jsdelivr.net/npm/@booga/vRegistry@latest/dist/registry.json",
@@ -48,34 +39,20 @@ createRoot(document.getElementById("root")).render(
     },
     null,
     2
-  ),
-};
+  );
+}
 
-function buildPackageJson(appType: string): string {
+function buildScaffoldJson(appType: string): string {
+  const packageJson = readCanonicalPackageJson();
+
   return JSON.stringify(
     {
-      name: "my-booga-scaffold",
-      version: "0.0.0",
-      private: true,
-      type: "module",
-      scripts: { dev: "vite", build: "vite build", preview: "vite preview" },
-      dependencies: {
-        "@booga/vbrand": "^0.4.0-alpha.2",
-        "@booga/vblocks": "^0.4.0",
-        "@booga/vdsl": "^0.3.0",
-        "@booga/vtheme": "^0.3.0",
-        "@booga/vui": "^0.4.0",
-        react: "^18.3.0",
-        "react-dom": "^18.3.0",
+      appType,
+      generatedBy: {
+        package: VCLI_PACKAGE_NAME,
+        version: VCLI_VERSION,
       },
-      devDependencies: {
-        "@vitejs/plugin-react": "^4.3.0",
-        autoprefixer: "^10.4.0",
-        postcss: "^8.4.0",
-        tailwindcss: "^3.4.0",
-        vite: "^5.4.0",
-      },
-      _scaffoldAppType: appType,
+      dependencies: packageJson.dependencies ?? {},
     },
     null,
     2
@@ -89,15 +66,16 @@ export async function downloadScaffoldZip(
 ): Promise<void> {
   const zip = new JSZip();
 
-  zip.file("package.json", buildPackageJson(appType));
+  zip.file("package.json", scaffoldPackageJsonRaw);
+  zip.file("vcli.config.json", buildVcliConfigJson());
 
-  for (const [filePath, content] of Object.entries(SCAFFOLD_FILES)) {
+  for (const [filePath, content] of CANONICAL_SCAFFOLD_FILES) {
     zip.file(filePath, content);
   }
 
   zip.file("brand.json", JSON.stringify(brand, null, 2));
   zip.file("composition.json", JSON.stringify(composition, null, 2));
-  zip.file("scaffold.json", JSON.stringify({ appType }, null, 2));
+  zip.file("scaffold.json", buildScaffoldJson(appType));
 
   const blob = await zip.generateAsync({ type: "blob" });
   const url = URL.createObjectURL(blob);

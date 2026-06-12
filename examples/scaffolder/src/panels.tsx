@@ -1,36 +1,72 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { CompositionEditor } from "@booga/vbrand/composition";
 import type { CompositionSpec } from "@booga/vbrand/composition";
-import { getTemplate, TEMPLATE_IDS } from "@booga/vbrand/templates";
+import { TEMPLATE_IDS } from "@booga/vbrand/templates";
 import type { TemplateId } from "@booga/vbrand/templates";
 import { BROWSER_PREFIXES } from "./handle.js";
+import { buildPreviewHtml } from "./preview-html.js";
+import {
+  controlStyle,
+  handleInputStyle,
+  loadButtonStyle,
+  panelStyle,
+  previewFrameStyle,
+  scaffolderTheme,
+  stateNoteStyle,
+} from "./scaffolder-theme.js";
 import type { BrandState } from "./use-brand-loader.js";
 
 const FIXTURE_OPTIONS = ["stripe", "vercel", "linear", "notion", "github"] as const;
 
-const panelStyle: React.CSSProperties = {
-  flex: 1,
-  borderRight: "1px solid oklch(90% .008 240)",
-  display: "flex",
-  flexDirection: "column",
-  overflow: "hidden",
-};
+const CONTROL_IDS = {
+  fixture: "sfc-brand-fixture",
+  handle: "sfc-brand-source-handle",
+  appType: "sfc-app-type",
+} as const;
 
-function PanelHeader({ children }: { children: React.ReactNode }) {
+function PanelHeader({ children }: { readonly children: React.ReactNode }) {
   return (
     <div
       style={{
-        padding: "0.5rem 1rem",
-        borderBottom: "1px solid oklch(90% .008 240)",
-        fontWeight: 600,
-        fontSize: "0.75rem",
-        color: "oklch(55% .015 240)",
+        padding: `${scaffolderTheme.space.sm} ${scaffolderTheme.space.lg}`,
+        borderBottom: `1px solid ${scaffolderTheme.surface.border}`,
+        borderTop: `2px solid ${scaffolderTheme.surface.accent}`,
+        backgroundColor: scaffolderTheme.surface.panel,
+        boxShadow: scaffolderTheme.shadow.sm,
+        fontWeight: 700,
+        fontSize: scaffolderTheme.text.xs,
+        color: scaffolderTheme.surface.muted,
         textTransform: "uppercase",
         letterSpacing: "0.1em",
       }}
     >
       {children}
     </div>
+  );
+}
+
+interface FieldLabelProps {
+  readonly htmlFor: string;
+  readonly children: React.ReactNode;
+  readonly marginTop?: boolean;
+}
+
+function FieldLabel({ htmlFor, children, marginTop = false }: FieldLabelProps) {
+  return (
+    <label
+      htmlFor={htmlFor}
+      style={{
+        fontSize: scaffolderTheme.text.xs,
+        fontWeight: 700,
+        letterSpacing: "0.1em",
+        lineHeight: 1.6,
+        textTransform: "uppercase",
+        color: scaffolderTheme.surface.muted,
+        marginTop: marginTop ? scaffolderTheme.space.md : undefined,
+      }}
+    >
+      {children}
+    </label>
   );
 }
 
@@ -57,33 +93,29 @@ export function BrandPanel({
     FIXTURE_OPTIONS.find((f) => inputHandle === `fixture:${f}`) ?? "";
 
   return (
-    <div style={{ ...panelStyle, maxWidth: 280 }}>
+    <div style={{ ...panelStyle, maxWidth: "17.5rem" }}>
       <PanelHeader>Brand source</PanelHeader>
       <div
         style={{
-          padding: "0.75rem",
+          padding: scaffolderTheme.space.lg,
           display: "flex",
           flexDirection: "column",
-          gap: "0.5rem",
+          gap: scaffolderTheme.space.md,
+          backgroundColor: scaffolderTheme.surface.app,
         }}
       >
-        <label style={{ fontSize: "0.75rem", color: "oklch(55% .015 240)" }}>
-          Fixture
-        </label>
+        <FieldLabel htmlFor={CONTROL_IDS.fixture}>Brand fixture</FieldLabel>
         <select
+          id={CONTROL_IDS.fixture}
+          aria-label="Brand fixture"
           className="sfc-select"
           value={activeFixture}
           onChange={(e) => {
             if (e.target.value) onFixtureSelect(e.target.value);
           }}
-          style={{
-            padding: "0.375rem",
-            fontSize: "0.875rem",
-            border: "1px solid oklch(90% .008 240)",
-            borderRadius: "0.25rem",
-          }}
+          style={controlStyle}
         >
-          <option value="">-- pick fixture --</option>
+          <option value="">Select brand fixture</option>
           {FIXTURE_OPTIONS.map((f) => (
             <option key={f} value={f}>
               {f}
@@ -91,63 +123,40 @@ export function BrandPanel({
           ))}
         </select>
 
-        <label
-          style={{
-            fontSize: "0.75rem",
-            color: "oklch(55% .015 240)",
-            marginTop: "0.5rem",
-          }}
-        >
-          {`Or enter handle (${BROWSER_PREFIXES.join(", ")})`}
-        </label>
+        <FieldLabel htmlFor={CONTROL_IDS.handle} marginTop>
+          {`Brand source handle (${BROWSER_PREFIXES.join(", ")})`}
+        </FieldLabel>
         <input
+          id={CONTROL_IDS.handle}
+          aria-label="Brand source handle"
           className="sfc-input"
           value={inputHandle}
           onChange={(e) => onInputHandleChange(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter") onLoad(); }}
-          placeholder="fixture:stripe"
-          style={{
-            padding: "0.375rem",
-            fontSize: "0.875rem",
-            border: "1px solid oklch(90% .008 240)",
-            borderRadius: "0.25rem",
+          onKeyDown={(e) => {
+            if (e.key === "Enter") onLoad();
           }}
+          placeholder="fixture:stripe"
+          style={handleInputStyle}
         />
         <button
+          aria-label="Load brand"
           className="sfc-btn-load"
           onClick={onLoad}
-          style={{
-            padding: "0.375rem",
-            fontSize: "0.875rem",
-            backgroundColor: "oklch(95% .008 240)",
-            border: "1px solid oklch(90% .008 240)",
-            borderRadius: "0.25rem",
-            cursor: "pointer",
-            transition: "filter 0.12s",
-          }}
+          style={loadButtonStyle}
         >
-          Load
+          Load brand
         </button>
 
-        <label
-          style={{
-            fontSize: "0.75rem",
-            color: "oklch(55% .015 240)",
-            marginTop: "0.5rem",
-          }}
-        >
+        <FieldLabel htmlFor={CONTROL_IDS.appType} marginTop>
           App type
-        </label>
+        </FieldLabel>
         <select
+          id={CONTROL_IDS.appType}
+          aria-label="App type"
           className="sfc-select"
           value={appType}
           onChange={(e) => onAppTypeChange(e.target.value as TemplateId)}
-          style={{
-            padding: "0.375rem",
-            fontSize: "0.875rem",
-            border: "1px solid oklch(90% .008 240)",
-            borderRadius: "0.25rem",
-          }}
+          style={controlStyle}
         >
           {TEMPLATE_IDS.map((id) => (
             <option key={id} value={id}>
@@ -159,9 +168,13 @@ export function BrandPanel({
         {brandState.status === "error" && (
           <div
             style={{
-              color: "oklch(55% .22 27)",
-              fontSize: "0.75rem",
-              marginTop: "0.5rem",
+              ...stateNoteStyle,
+              borderColor: scaffolderTheme.surface.danger,
+              backgroundColor: scaffolderTheme.surface.dangerSurface,
+              color: scaffolderTheme.surface.danger,
+              fontSize: scaffolderTheme.text.xs,
+              fontWeight: 600,
+              marginTop: scaffolderTheme.space.sm,
             }}
           >
             {brandState.message}
@@ -188,9 +201,16 @@ export function CompositionPanel({
   return (
     <div style={panelStyle}>
       <PanelHeader>Composition</PanelHeader>
-      <div style={{ flex: 1, overflow: "auto", padding: "0.75rem" }}>
+      <div
+        style={{
+          flex: 1,
+          overflow: "auto",
+          padding: scaffolderTheme.space.lg,
+          backgroundColor: scaffolderTheme.surface.app,
+        }}
+      >
         {brandState.status === "loading" && (
-          <div style={{ fontSize: "0.875rem", color: "oklch(55% .015 240)" }}>
+          <div style={stateNoteStyle}>
             Loading...
           </div>
         )}
@@ -217,13 +237,40 @@ export function PreviewPanel({
   appType,
   composition,
 }: PreviewPanelProps) {
+  const themedHtml = useMemo(() => {
+    if (brandState.status !== "ready" || composition === null) return null;
+    return buildPreviewHtml({
+      brand: brandState.brand,
+      appType,
+      composition,
+      baseURI: document.baseURI,
+    });
+  }, [appType, brandState, composition]);
+
   return (
     <div style={{ ...panelStyle, borderRight: "none", flex: 2, overflow: "auto" }}>
       <PanelHeader>Preview</PanelHeader>
-      <div style={{ flex: 1, overflow: "auto" }}>
-        {brandState.status === "ready" &&
-          composition !== null &&
-          getTemplate(appType).compose(brandState.brand, composition)}
+      <div
+        style={{
+          flex: 1,
+          overflow: "auto",
+          padding: scaffolderTheme.space.lg,
+          backgroundColor: scaffolderTheme.surface.app,
+          boxSizing: "border-box",
+        }}
+      >
+        {themedHtml === null ? (
+          <div style={stateNoteStyle}>
+            Load a brand source to render the isolated preview document.
+          </div>
+        ) : (
+          <iframe
+            srcDoc={themedHtml}
+            title="vCli preview"
+            sandbox="allow-same-origin"
+            style={previewFrameStyle}
+          />
+        )}
       </div>
     </div>
   );

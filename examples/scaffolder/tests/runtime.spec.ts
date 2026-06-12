@@ -1,56 +1,22 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2026 bvasilenko
-import { test, expect } from "@playwright/test";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-import type { Server } from "node:http";
-import fs from "fs-extra";
-import JSZip from "jszip";
-import { serveDir } from "../../../tests/_helpers/static-server.js";
-import { collectPageIssues } from "../../../tests/_helpers/page-issues.js";
+import { expect, test } from "./scaffolder-fixtures.js";
+import {
+  downloadScaffoldArchive,
+  openScaffolder,
+  previewFrame,
+  readCanonicalPackageJson,
+  readZipJson,
+  scaffolderUrl,
+  type PackageJsonContract,
+  type ScaffoldMetadataContract,
+} from "./scaffolder-test-utils.js";
 
-const ALL_APP_TYPES = ["landing", "marketing", "docs", "dashboard"] as const;
-
-const DIST_DIR = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "../dist"
-);
-
-let serverInstance: Server;
-let baseUrl: string;
-
-test.beforeAll(async () => {
-  if (!(await fs.pathExists(path.join(DIST_DIR, "index.html")))) {
-    throw new Error(
-      "examples/scaffolder/dist/index.html not found. Run: cd examples/scaffolder && bun run build"
-    );
-  }
-  const handle = serveDir(DIST_DIR, {
-    stripBase: "/vCli",
-    spaFallback: true,
-  });
-  serverInstance = handle.server;
-  baseUrl = handle.url;
-});
-
-test.afterAll(() => {
-  serverInstance?.close();
-});
-
-for (const appType of ALL_APP_TYPES) {
-  test(`${appType} app-type loads fixture:stripe without JS errors`, async ({ page }) => {
-    const collector = collectPageIssues(page);
-
-    await page.goto(`${baseUrl}/?brand=fixture%3Astripe&app=${appType}`);
-    await expect(page.locator("button:has-text('Download scaffold')")).toBeEnabled({ timeout: 15_000 });
-
-    const jsErrors = collector.issues.filter((i) => i.kind === "js-error");
-    expect(jsErrors).toHaveLength(0);
-  });
-}
-
-test("composition editor panel mounts with section toggles", async ({ page }) => {
-  await page.goto(`${baseUrl}/?brand=fixture%3Astripe&app=landing`);
+test("composition editor panel mounts with section toggles", async ({
+  baseUrl,
+  page,
+}) => {
+  await openScaffolder(page, baseUrl);
   await expect(page.locator("aside")).toBeVisible({ timeout: 15_000 });
 
   await expect(page.getByText("Sections", { exact: true })).toBeVisible();
@@ -59,19 +25,19 @@ test("composition editor panel mounts with section toggles", async ({ page }) =>
   expect(await checkboxes.count()).toBeGreaterThanOrEqual(1);
 });
 
-test("preview panel contains rendered template content", async ({ page }) => {
-  await page.goto(`${baseUrl}/?brand=fixture%3Astripe&app=landing`);
+test("preview panel contains rendered template content", async ({ baseUrl, page }) => {
+  await openScaffolder(page, baseUrl);
   await expect(page.locator("aside")).toBeVisible({ timeout: 15_000 });
 
   await expect(page.getByText("Preview", { exact: true })).toBeVisible();
-
+  const frame = previewFrame(page);
   await expect(
-    page.getByText("Preview", { exact: true }).first().locator("+ div")
-  ).not.toBeEmpty({ timeout: 5_000 });
+    frame.getByRole("heading", { name: "Stripe", exact: true })
+  ).toBeVisible({ timeout: 5_000 });
 });
 
-test("download button is enabled after brand loads", async ({ page }) => {
-  await page.goto(`${baseUrl}/?brand=fixture%3Astripe&app=landing`);
+test("download button is enabled after brand loads", async ({ baseUrl, page }) => {
+  await openScaffolder(page, baseUrl);
   await expect(page.locator("aside")).toBeVisible({ timeout: 15_000 });
 
   const downloadBtn = page.locator("button:has-text('Download scaffold')");
@@ -79,33 +45,29 @@ test("download button is enabled after brand loads", async ({ page }) => {
   await expect(downloadBtn).toBeEnabled();
 });
 
-test("download button produces a non-empty zip file", async ({ page }) => {
-  await page.goto(`${baseUrl}/?brand=fixture%3Astripe&app=landing`);
+test("download button produces a non-empty zip file", async ({ baseUrl, page }) => {
+  await openScaffolder(page, baseUrl);
   await expect(page.locator("aside")).toBeVisible({ timeout: 15_000 });
 
-  const [download] = await Promise.all([
-    page.waitForEvent("download"),
-    page.locator("button:has-text('Download scaffold')").click(),
-  ]);
-
-  const downloadPath = await download.path();
-  if (!downloadPath) throw new Error("Download path is null");
-  const { size } = await fs.stat(downloadPath);
-  expect(size).toBeGreaterThan(0);
+  const zip = await downloadScaffoldArchive(page);
+  expect(Object.keys(zip.files).length).toBeGreaterThan(0);
 });
 
-test("docs app-type renders docs-template section checkboxes in the composition editor", async ({ page }) => {
-  await page.goto(`${baseUrl}/?brand=fixture%3Astripe&app=docs`);
-
-  // The docs template renders its own <aside> for the sidebar section, so waiting
-  // on a specific CompositionEditor checkbox avoids the strict-mode aside collision.
+test("docs app-type renders docs-template section checkboxes in the composition editor", async ({
+  baseUrl,
+  page,
+}) => {
+  await page.goto(scaffolderUrl(baseUrl, "stripe", "docs"));
   await expect(page.locator("#section-sidebar")).toBeVisible({ timeout: 15_000 });
   await expect(page.locator("#section-article")).toBeVisible();
   await expect(page.locator("#section-toc")).toBeVisible();
 });
 
-test("?app=<type> query parameter restores the app-type sections on page reload", async ({ page }) => {
-  await page.goto(`${baseUrl}/?brand=fixture%3Astripe&app=docs`);
+test("?app=<type> query parameter restores the app-type sections on page reload", async ({
+  baseUrl,
+  page,
+}) => {
+  await page.goto(scaffolderUrl(baseUrl, "stripe", "docs"));
   await expect(page.locator("#section-sidebar")).toBeVisible({ timeout: 15_000 });
 
   await page.reload();
@@ -114,34 +76,42 @@ test("?app=<type> query parameter restores the app-type sections on page reload"
   await expect(page.locator("#section-article")).toBeVisible();
 });
 
-test("download zip scaffold.json.appType matches the selected app type", async ({ page }) => {
-  await page.goto(`${baseUrl}/?brand=fixture%3Astripe&app=docs`);
+test("download zip scaffold.json.appType matches the selected app type", async ({
+  baseUrl,
+  page,
+}) => {
+  await page.goto(scaffolderUrl(baseUrl, "stripe", "docs"));
   await expect(page.locator("#section-sidebar")).toBeVisible({ timeout: 15_000 });
 
-  const [download] = await Promise.all([
-    page.waitForEvent("download"),
-    page.locator("button:has-text('Download scaffold')").click(),
-  ]);
-
-  const downloadPath = await download.path();
-  if (!downloadPath) throw new Error("Download path is null");
-  const buffer = await fs.readFile(downloadPath);
-  const zip = await JSZip.loadAsync(buffer);
-  const scaffoldFile = zip.file("scaffold.json");
-  if (!scaffoldFile) throw new Error("scaffold.json not found in downloaded zip");
-  const scaffoldJson = JSON.parse(await scaffoldFile.async("string")) as { appType: string };
+  const zip = await downloadScaffoldArchive(page);
+  const canonicalPackage = await readCanonicalPackageJson();
+  const packageJson = await readZipJson<PackageJsonContract>(zip, "package.json");
+  const scaffoldJson = await readZipJson<ScaffoldMetadataContract>(
+    zip,
+    "scaffold.json"
+  );
   expect(scaffoldJson.appType).toBe("docs");
+  expect(packageJson.dependencies).toEqual(canonicalPackage.dependencies);
+  expect(scaffoldJson.dependencies).toEqual(canonicalPackage.dependencies);
 });
 
-test("URL carries a composition hash after the initial brand load", async ({ page }) => {
-  await page.goto(`${baseUrl}/?brand=fixture%3Astripe&app=landing`);
-  await expect(page.locator("button:has-text('Download scaffold')")).toBeEnabled({ timeout: 15_000 });
+test("URL carries a composition hash after the initial brand load", async ({
+  baseUrl,
+  page,
+}) => {
+  await page.goto(scaffolderUrl(baseUrl, "stripe", "landing"));
+  await expect(page.locator("button:has-text('Download scaffold')")).toBeEnabled({
+    timeout: 15_000,
+  });
 
   await expect(page).toHaveURL(/#composition=/);
 });
 
-test("page reload restores brand handle, app-type, and composition together from URL", async ({ page }) => {
-  await page.goto(`${baseUrl}/?brand=fixture%3Astripe&app=docs`);
+test("page reload restores brand handle, app-type, and composition together from URL", async ({
+  baseUrl,
+  page,
+}) => {
+  await page.goto(scaffolderUrl(baseUrl, "stripe", "docs"));
   await expect(page.locator("#section-sidebar")).toBeVisible({ timeout: 15_000 });
 
   await page.locator("#section-toc").click();
@@ -158,8 +128,11 @@ test("page reload restores brand handle, app-type, and composition together from
   await expect(page.locator("#section-toc")).not.toBeChecked();
 });
 
-test("switching app-type replaces composition with the new template default sections", async ({ page }) => {
-  await page.goto(`${baseUrl}/?brand=fixture%3Astripe&app=landing`);
+test("switching app-type replaces composition with the new template default sections", async ({
+  baseUrl,
+  page,
+}) => {
+  await openScaffolder(page, baseUrl);
   await expect(page.locator("aside")).toBeVisible({ timeout: 15_000 });
   await expect(page.locator("#section-hero")).toBeVisible();
 
@@ -172,8 +145,11 @@ test("switching app-type replaces composition with the new template default sect
   await expect(page).toHaveURL(/app=docs/);
 });
 
-test("composition section state persists when the brand handle changes", async ({ page }) => {
-  await page.goto(`${baseUrl}/?brand=fixture%3Astripe&app=landing`);
+test("composition section state persists when the brand handle changes", async ({
+  baseUrl,
+  page,
+}) => {
+  await openScaffolder(page, baseUrl);
   await expect(page.locator("aside")).toBeVisible({ timeout: 15_000 });
 
   await page.locator("#section-hero").click();
@@ -181,21 +157,33 @@ test("composition section state persists when the brand handle changes", async (
 
   await page.locator("select.sfc-select").first().selectOption("vercel");
 
-  await expect(page.locator("button:has-text('Download scaffold')")).toBeEnabled({ timeout: 15_000 });
+  await expect(page.locator("button:has-text('Download scaffold')")).toBeEnabled({
+    timeout: 15_000,
+  });
   await expect(page.locator("#section-hero")).not.toBeChecked();
 });
 
-test("selecting a fixture from the dropdown loads the brand without the Load button", async ({ page }) => {
-  await page.goto(`${baseUrl}/?brand=fixture%3Astripe&app=landing`);
-  await expect(page.locator("button:has-text('Download scaffold')")).toBeEnabled({ timeout: 15_000 });
+test("selecting a fixture from the dropdown loads the brand without the Load button", async ({
+  baseUrl,
+  page,
+}) => {
+  await page.goto(scaffolderUrl(baseUrl, "stripe", "landing"));
+  await expect(page.locator("button:has-text('Download scaffold')")).toBeEnabled({
+    timeout: 15_000,
+  });
 
   await page.locator("select.sfc-select").first().selectOption("vercel");
 
-  await expect(page.locator("button:has-text('Download scaffold')")).toBeEnabled({ timeout: 15_000 });
+  await expect(page.locator("button:has-text('Download scaffold')")).toBeEnabled({
+    timeout: 15_000,
+  });
   await expect(page).toHaveURL(/brand=fixture%3Avercel/);
 });
 
-test("unrecognised brand handle prefix surfaces an error message in the panel", async ({ page }) => {
+test("unrecognised brand handle prefix surfaces an error message in the panel", async ({
+  baseUrl,
+  page,
+}) => {
   await page.goto(`${baseUrl}/?brand=bad%3Ahandle&app=landing`);
 
   await expect(page.getByText(/Unknown prefix/)).toBeVisible({ timeout: 10_000 });

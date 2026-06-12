@@ -1,6 +1,6 @@
 {
   "name": "@booga/vcli",
-  "version": "0.3.0-alpha.1",
+  "version": "0.3.0-alpha.2",
   "description": "Zero-install vBlocks demo and pre-populated scaffold CLI. booga demo previews the marketing page. booga init scaffolds a Vite + React + vBlocks project. add, build, check included.",
   "type": "module",
   "bin": {
@@ -27,11 +27,12 @@
     "test": "vitest run --coverage",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "shape-history": "bun run scripts/history-shape/index.ts"
+    "shape-history": "bun run scripts/history-shape/index.ts",
+    "web-qa": "node scripts/web-qa-execute.mjs"
   },
   "dependencies": {
     "@booga/vblocks": "^0.4.0",
-    "@booga/vbrand": "^0.4.0-alpha.2",
+    "@booga/vbrand": "^0.4.0-alpha.4.2.3",
     "@booga/vdsl": "^0.3.0",
     "@booga/vfixtures": "^0.1.1",
     "@booga/vlint": "^0.1.0",

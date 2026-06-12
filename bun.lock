@@ -5,7 +5,7 @@
       "name": "@booga/vcli",
       "dependencies": {
         "@booga/vblocks": "^0.4.0",
-        "@booga/vbrand": "^0.4.0-alpha.2",
+        "@booga/vbrand": "^0.4.0-alpha.4.2.3",
         "@booga/vdsl": "^0.3.0",
         "@booga/vfixtures": "^0.1.1",
         "@booga/vlint": "^0.1.0",
@@ -72,7 +72,7 @@
 
     "@booga/vblocks": ["@booga/vblocks@0.4.0", "", { "dependencies": { "@booga/vdsl": "^0.3.0", "@booga/vhooks": "^0.1.0", "@booga/vui": "^0.4.0", "zod": "^3.0.0" }, "peerDependencies": { "react": "^18.0.0", "react-dom": "^18.0.0" } }, "sha512-0TP8osd7C1I4He2WBypD+PLgJmVBZvO/lE5TYdWoC+dCorIByQN2/S67jMHm2jsJOw0OGNnoKTllO+9p4OFCyg=="],
 
-    "@booga/vbrand": ["@booga/vbrand@0.4.0-alpha.2", "", { "dependencies": { "@fontsource/inter": "^5.2.8", "@resvg/resvg-js": "^2.6.2", "axe-core": "^4.11.4", "chalk": "^5.3.0", "commander": "^12.0.0", "jsdom": "^29.1.1", "node-html-parser": "^6.1.13", "ora": "^7.0.1", "satori": "^0.26.0", "sharp": "^0.33.0", "svgo": "^3.2.0", "zod": "^3.23.0" }, "peerDependencies": { "@booga/vblocks": "^0.4.0", "@booga/vfixtures": "^0.1.1", "@booga/vui": "^0.4.0", "react": "^18.0.0", "react-dom": "^18.0.0" }, "optionalPeers": ["@booga/vblocks", "@booga/vfixtures", "@booga/vui", "react", "react-dom"], "bin": { "vbrand": "dist/cli.js" } }, "sha512-gZ2hEVnEQTbYGmoFzTro0fMVTcisNuqFTy1Np4UKxoVBpSUotvOK5FMs9zorIgSTmSuAOGvYpGWfJeJ0Fq5o6g=="],
+    "@booga/vbrand": ["@booga/vbrand@0.4.0-alpha.4.2.3", "", { "dependencies": { "@fontsource/inter": "^5.2.8", "@resvg/resvg-js": "^2.6.2", "axe-core": "^4.11.4", "chalk": "^5.3.0", "commander": "^12.0.0", "jsdom": "^29.1.1", "node-html-parser": "^6.1.13", "ora": "^7.0.1", "satori": "^0.26.0", "sharp": "^0.33.0", "svgo": "^3.2.0", "zod": "^3.23.0" }, "peerDependencies": { "@booga/vblocks": "^0.4.0", "@booga/vfixtures": "^0.1.1", "@booga/vui": "^0.4.0", "react": "^18.0.0", "react-dom": "^18.0.0" }, "optionalPeers": ["@booga/vblocks", "@booga/vfixtures", "@booga/vui", "react", "react-dom"], "bin": { "vbrand": "dist/cli.js" } }, "sha512-zyAMAXgDfmflkYDNQjuGpmJnOZexRm6T9NsRKkIFoLsslEbGCh1bfS5ehCqBZ8rUEBwQmbvnPkylF6ZvVoY3JA=="],
 
     "@booga/vdsl": ["@booga/vdsl@0.3.0", "", { "dependencies": { "zod": "^3.0.0" }, "peerDependencies": { "react": "^18.0.0", "react-dom": "^18.0.0" } }, "sha512-lqbgg9wrOaSpGeovDQ1Esbgdrg+wIo+xOMgDHNL0QG3YVLMfB3x8mP5SHz7oxdSRbpHDwXTg0IUwYQzztVHQDw=="],
 
